@@ -159,7 +159,7 @@ def run_chat(user_msg):
             
             # 6. 保存到历史记录中
             st.session_state["messages"].append({"role": "assistant", "content": ans_text})
-            st.session_state["clear_input"] = True
+            #st.session_state["clear_input"] = True
             st.rerun()
             
         except Exception as e:
@@ -195,3 +195,10 @@ for i, m in enumerate(st.session_state["messages"]):
                 st.session_state["messages"] = st.session_state["messages"][:-2]
                 # 3. 重新调用 AI
                 run_chat(last_user_msg)
+# 在历史记录的最下方，添加一个固定聊天输入框
+chat_prompt = st.chat_input("对诊断报告有任何疑问，或需要修改建议，请在这里告诉我...")
+
+# 如果用户在这个框里输入了内容并按了回车
+if chat_prompt:
+    # 直接调用咱们写好的 run_chat 函数
+    run_chat(chat_prompt)
