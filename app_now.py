@@ -137,7 +137,7 @@ def run_chat(user_msg):
         try:
             # 2. 发起流式请求 (注意 stream=True)
             resp = client.chat.completions.create(
-                model="glm-4.7-flash",  # 如果遇到 429 拥堵，可以临时换成 glm-4-flash
+                model="glm-4-flash",  # 如果遇到 429 拥堵，可以临时换成 glm-4-flash
                 messages=[{"role": "system", "content": build_system_prompt()}] + st.session_state["messages"],
                 temperature=0.3,
                 max_tokens=8192,
