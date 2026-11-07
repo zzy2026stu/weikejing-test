@@ -6,7 +6,7 @@ from openai import OpenAI
 from pypdf import PdfReader
 
 # 从 streamlit secrets.toml 安全读取密钥
-client = OpenAI(api_key=st.secrets["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
+client = OpenAI(api_key=st.secrets["ZHIPU_API_KEY"], base_url="https://open.bigmodel.cn/api/paas/v4/")
 
 # 课程标准PDF路径
 PDF_PATH = Path(__file__).parent / "2025年修订)《义务教育语文课程标准·日常修订版)(2022年版.pdf"
@@ -134,7 +134,7 @@ def run_chat(user_msg):
     with st.spinner("微课镜正在分析课堂语言，生成诊断报告..."):
         try:
             resp = client.chat.completions.create(
-                model="deepseek-chat",
+                model="glm-4-flash",
                 messages=[{"role": "system", "content": build_system_prompt()}]
                           + st.session_state["messages"],
                 temperature=0.3
