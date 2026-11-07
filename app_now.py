@@ -137,9 +137,14 @@ def run_chat(user_msg):
                 model="glm-4.7-flash",
                 messages=[{"role": "system", "content": build_system_prompt()}]
                           + st.session_state["messages"],
-                temperature=0.3
+                temperature=0.3,
+                max_tokens=4000,
             )
-            ans = resp.choices[0].message.content
+            def generate_chunks():
+                for chunk in resp:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+            ans = st.write_stream(generate_chunks())
             st.session_state["messages"].append({"role": "assistant", "content": ans})
             st.session_state["clear_input"] = True
             st.rerun()
