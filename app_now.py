@@ -134,7 +134,7 @@ def run_chat(user_msg):
     with st.spinner("微课镜正在分析课堂语言，生成诊断报告..."):
         try:
             resp = client.chat.completions.create(
-                model="glm-4-flash",
+                model="glm-4.7-flash",
                 messages=[{"role": "system", "content": build_system_prompt()}]
                           + st.session_state["messages"],
                 temperature=0.3
