@@ -130,30 +130,42 @@ def build_system_prompt():
 
 # 调用DeepSeek并把对话写入历史（多轮）
 def run_chat(user_msg):
+    # 1. 记录用户消息
     st.session_state["messages"].append({"role": "user", "content": user_msg})
-    with st.spinner("微课镜正在分析课堂语言，生成诊断报告..."):
+    
+    with st.spinner("微课镜正在深度思考，开始输出..."):
         try:
+            # 2. 发起流式请求 (注意 stream=True)
             resp = client.chat.completions.create(
-                model="glm-4.7-flash",
-                messages=[{"role": "system", "content": build_system_prompt()}]
-                          + st.session_state["messages"],
+                model="glm-4.7-flash",  # 如果遇到 429 拥堵，可以临时换成 glm-4-flash
+                messages=[{"role": "system", "content": build_system_prompt()}] + st.session_state["messages"],
                 temperature=0.3,
                 max_tokens=4000,
+                stream=True
             )
+            
+            # 3. 定义打字机的搬运工
             def generate_chunks():
                 for chunk in resp:
-                    if chunk.choices[0].delta.content:
+                    # 安全检查：防止空数据或者结束符报错
+                    if chunk.choices and chunk.choices[0].delta.content:
                         yield chunk.choices[0].delta.content
-            ans = st.write_stream(generate_chunks())
-            st.session_state["messages"].append({"role": "assistant", "content": ans})
+            
+            # 4. 在网页上实时打印，并接收完整的碎片（这里返回的是一个元组）
+            ans_tuple = st.write_stream(generate_chunks())
+            
+            # 5. 把元组里的碎片拼成一个完整的字符串
+            ans_text = "".join(ans_tuple)
+            
+            # 6. 保存到历史记录中
+            st.session_state["messages"].append({"role": "assistant", "content": ans_text})
             st.session_state["clear_input"] = True
             st.rerun()
+            
         except Exception as e:
-            # 回滚刚加入的用户消息，方便重试
+            # 如果报错，回滚刚才的用户消息，并提示
             st.session_state["messages"].pop()
-            st.error(f"分析失败，请检查网络或稍后重试。错误信息：{e}")
-
-
+            st.error(f"分析失败：{e}")
 # 操作按钮
 col1, col2 = st.columns(2)
 with col1:
